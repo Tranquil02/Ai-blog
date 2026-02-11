@@ -1,4 +1,3 @@
-import { getAllBlogs } from '@/lib/blog';
 import HomeClient from './HomeClient';
 
 export const metadata = {
@@ -8,7 +7,5 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const blogs = await getAllBlogs(); // server fetch
-
-  return <HomeClient initialBlogs={blogs} />;
+  return <HomeClient initialBlogs={[]} />;
 }
