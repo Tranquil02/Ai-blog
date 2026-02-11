@@ -1,3 +1,4 @@
+import { getAllBlogs } from '@/lib/blog';
 import HomeClient from './HomeClient';
 
 export const metadata = {
@@ -6,6 +7,15 @@ export const metadata = {
     "AI productivity playbooks and workflows tailored for small business teams.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
-  return <HomeClient initialBlogs={[]} />;
+  let blogs = [];
+  try {
+    blogs = await getAllBlogs();
+  } catch {
+    blogs = [];
+  }
+
+  return <HomeClient initialBlogs={blogs} />;
 }

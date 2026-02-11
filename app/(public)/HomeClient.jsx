@@ -19,7 +19,7 @@ export default function HomeClient({ initialBlogs }) {
       const { data } = await axios.get('/api/blog/getAll');
       return data;
     },
-    initialData: initialBlogs,
+    initialData: Array.isArray(initialBlogs) && initialBlogs.length > 0 ? initialBlogs : undefined,
     staleTime: 60_000,
   });
 
