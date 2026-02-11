@@ -22,9 +22,12 @@ export async function GET() {
       mostViewed,
     });
   } catch {
-    return NextResponse.json(
-      { error: "Failed to fetch blogs" },
-      { status: 500 }
-    );
+    // Do not hard-fail the public blog page if DB calls fail.
+    return NextResponse.json({
+      featured: null,
+      trending: [],
+      latest: [],
+      mostViewed: [],
+    });
   }
 }
