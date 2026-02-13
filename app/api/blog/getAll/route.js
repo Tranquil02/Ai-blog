@@ -2,11 +2,17 @@
 import { NextResponse } from 'next/server'
 import { getAllBlogs } from '@/lib/blog'
 
-export const revalidate = 60
+export const dynamic = "force-dynamic"
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const blogs = await getAllBlogs()
+    const { searchParams } = new URL(request.url)
+    const rawLimit = Number(searchParams.get("limit") || "200")
+    const limit = Number.isFinite(rawLimit)
+      ? Math.min(Math.max(Math.trunc(rawLimit), 1), 500)
+      : 200
+
+    const blogs = await getAllBlogs(limit)
     return NextResponse.json(blogs, {
       headers: {
         "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
