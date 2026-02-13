@@ -5,6 +5,9 @@ export const metadata = {
     process.env.NEXT_PUBLIC_SITE_URL || "https://trendystory.site"
   ),
   manifest: "/manifest.webmanifest",
+  other: {
+    "google-adsense-account": "ca-pub-5272866170824796",
+  },
   title: "TrendyStory | AI Productivity for Small Business",
   description:
     "TrendyStory helps small businesses use AI to automate operations, cut costs, and grow faster with practical playbooks.",
