@@ -1,16 +1,17 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Footer from '@/components/footer';
 import BlogGrid from '@/components/blog/BlogGrid';
 import Section from '@/components/Section';
 import Image from 'next/image';
-import { useQuery } from '@tanstack/react-query';
-import { fetchAllBlogs, fetchFeaturedBlogs } from '@/lib/api/blog';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { fetchBlogsPage, fetchFeaturedBlogs } from '@/lib/api/blog';
 
 export default function BlogClient() {
   const router = useRouter();
+  const loadMoreRef = useRef(null);
 
   const { data: featureData, isLoading, error } = useQuery({
     queryKey: ['featured-blogs'],
@@ -20,9 +21,18 @@ export default function BlogClient() {
     refetchOnWindowFocus: false,
   });
 
-  const { data: allBlogs = [] } = useQuery({
-    queryKey: ['all-blogs'],
-    queryFn: fetchAllBlogs,
+  const {
+    data: pagedBlogs,
+    isLoading: isBlogsLoading,
+    error: blogsError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['all-blogs-infinite'],
+    queryFn: ({ pageParam }) => fetchBlogsPage({ pageParam, limit: 24 }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage?.nextPage ?? undefined,
     staleTime: 60_000,
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,
@@ -37,6 +47,32 @@ export default function BlogClient() {
     latest = [],
     mostViewed = [],
   } = featureData || {};
+
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node || !hasNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      {
+        root: null,
+        rootMargin: '300px 0px',
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  const allBlogs = useMemo(() => {
+    return (pagedBlogs?.pages || []).flatMap((page) => page?.items || []);
+  }, [pagedBlogs]);
 
   const allPosts = useMemo(() => {
     const map = new Map();
@@ -68,8 +104,10 @@ export default function BlogClient() {
   const hasTrending = trending.length > 0;
   const hasLatest = latest.length > 0;
   const hasMostViewed = mostViewed.length > 0;
+  const loadingInitial = isLoading || isBlogsLoading;
+  const loadError = error || blogsError;
 
-  if (isLoading) {
+  if (loadingInitial) {
     return (
       <div className="min-h-screen grid place-items-center">
         Loading...
@@ -77,10 +115,10 @@ export default function BlogClient() {
     );
   }
 
-  if (error) {
+  if (loadError) {
     return (
       <div className="min-h-screen grid place-items-center text-red-500">
-        {error?.message || 'Failed to load blogs'}
+        {loadError?.message || 'Failed to load blogs'}
       </div>
     );
   }
@@ -220,6 +258,20 @@ export default function BlogClient() {
                   </button>
                 )}
               </div>
+            )}
+            <div ref={loadMoreRef} className="h-8" aria-hidden="true" />
+            {isFetchingNextPage && (
+              <div className="mt-6 flex items-center justify-center">
+                <div className="inline-flex items-center gap-3 rounded-full border border-[var(--border-light)] bg-[var(--bg-secondary)] px-4 py-2 text-xs uppercase tracking-[0.25em] text-[var(--text-muted)]">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--accent-secondary)]" />
+                  Loading more stories
+                </div>
+              </div>
+            )}
+            {!hasNextPage && allPosts.length > 0 && (
+              <p className="mt-8 text-center text-xs uppercase tracking-[0.25em] text-[var(--text-muted)]">
+                You reached the end
+              </p>
             )}
           </div>
         </section>
