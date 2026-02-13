@@ -19,7 +19,12 @@ export default function LocomotiveProvider({ children }) {
 
   const disableLocomotive =
     typeof pathname === "string" &&
-    (pathname === "/blog" || pathname.startsWith("/blog/"));
+    (
+      pathname === "/" ||
+      pathname === "/connect" ||
+      pathname === "/blog" ||
+      pathname.startsWith("/blog/")
+    );
 
   // Init Locomotive AFTER DOM paint
   useEffect(() => {
