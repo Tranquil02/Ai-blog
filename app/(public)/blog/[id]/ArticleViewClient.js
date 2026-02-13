@@ -299,7 +299,7 @@ export default function ArticleViewClient({ post }) {
               "@type": "WebPage",
               "@id":
                 (process.env.NEXT_PUBLIC_SITE_URL || "https://trendystory.site") +
-                `/blog/${post.id}`,
+                `/blog/${post.slug || post.id}`,
             },
             publisher: {
               "@type": "Organization",
