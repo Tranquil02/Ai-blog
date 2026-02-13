@@ -7,12 +7,12 @@ export const metadata = {
     "AI productivity playbooks and workflows tailored for small business teams.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function Home() {
   let blogs = [];
   try {
-    blogs = await getAllBlogs();
+    blogs = await getAllBlogs(7);
   } catch {
     blogs = [];
   }

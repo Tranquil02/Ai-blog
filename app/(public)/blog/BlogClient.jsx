@@ -259,7 +259,7 @@ export default function BlogClient() {
                 )}
               </div>
             )}
-            <div ref={loadMoreRef} className="h-8" aria-hidden="true" />
+            <div ref={loadMoreRef} className="h-8" />
             {isFetchingNextPage && (
               <div className="mt-6 flex items-center justify-center">
                 <div className="inline-flex items-center gap-3 rounded-full border border-[var(--border-light)] bg-[var(--bg-secondary)] px-4 py-2 text-xs uppercase tracking-[0.25em] text-[var(--text-muted)]">

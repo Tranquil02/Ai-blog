@@ -8,7 +8,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import LocomotiveProvider from '@/Provider/Locomotiveprovider';
 import NavbarWrapper from '@/components/NavbarWrapper';
 import NavObserver from '@/components/Navobserver';
-import Provider from '@/lib/tanstack_query';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -77,10 +76,8 @@ export default function PublicLayout({ children }) {
       <NavObserver />
 
       <LocomotiveProvider>
-        <Provider>
-          <div id="nav-sentinel" className="h-[50px]" aria-hidden="true" />
-          {children}
-        </Provider>
+        <div id="nav-sentinel" className="h-[50px]" />
+        {children}
       </LocomotiveProvider>
 
       <Analytics />

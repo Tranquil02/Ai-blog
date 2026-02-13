@@ -1,8 +1,5 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-
 import Hero from "@/components/Hero"
 import BlogGrid from '@/components/blog/BlogGrid';
 import Newsletter from '@/components/Newsletter';
@@ -13,21 +10,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function HomeClient({ initialBlogs }) {
-  const { data: blogs, error } = useQuery({
-    queryKey: ['blogs'],
-    queryFn: async () => {
-      const { data } = await axios.get('/api/blog/getAll');
-      return data;
-    },
-    initialData: Array.isArray(initialBlogs) && initialBlogs.length > 0 ? initialBlogs : undefined,
-    staleTime: 60_000,
-  });
-
-  if (error) {
-    return <p className="text-red-500">Failed to load blogs</p>;
-  }
-
-  const blogList = Array.isArray(blogs) ? blogs : [];
+  const blogList = Array.isArray(initialBlogs) ? initialBlogs : [];
   const featured = blogList[0];
   const latest = blogList.slice(1, 7);
 
