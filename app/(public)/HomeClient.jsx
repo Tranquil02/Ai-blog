@@ -1,5 +1,3 @@
-'use client';
-
 import Hero from "@/components/Hero"
 import BlogGrid from '@/components/blog/BlogGrid';
 import Newsletter from '@/components/Newsletter';
