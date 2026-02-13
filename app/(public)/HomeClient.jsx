@@ -49,7 +49,7 @@ export default function HomeClient({ initialBlogs }) {
                   {featured.excerpt}
                 </p>
                 <Link
-                  href={`/blog/${featured.id}`}
+                  href={`/blog/${featured.slug || featured.id}`}
                   className="mt-6 inline-flex items-center gap-3 rounded-full bg-[var(--text-heading)] px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--bg-primary)]"
                 >
                   Read the story
