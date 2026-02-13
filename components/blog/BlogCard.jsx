@@ -5,6 +5,13 @@ import { User, ArrowUpRight, Clock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
 export default function BlogCard({ post }) {
   const router = useRouter();
 
@@ -14,7 +21,7 @@ export default function BlogCard({ post }) {
   };
 
   const publishedDate = post?.published_at
-    ? new Date(post.published_at).toLocaleDateString()
+    ? dateFormatter.format(new Date(post.published_at))
     : "";
 
   return (
