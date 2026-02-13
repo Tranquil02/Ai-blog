@@ -15,12 +15,17 @@ export default function BlogClient() {
   const { data: featureData, isLoading, error } = useQuery({
     queryKey: ['featured-blogs'],
     queryFn: fetchFeaturedBlogs,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: allBlogs = [] } = useQuery({
     queryKey: ['all-blogs'],
     queryFn: fetchAllBlogs,
     staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const [search, setSearch] = useState('');
