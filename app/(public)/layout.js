@@ -5,7 +5,6 @@ import { Space_Grotesk, Fraunces } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-import LocomotiveProvider from '@/Provider/Locomotiveprovider';
 import NavbarWrapper from '@/components/NavbarWrapper';
 import NavObserver from '@/components/Navobserver';
 
@@ -75,10 +74,8 @@ export default function PublicLayout({ children }) {
       <NavbarWrapper />
       <NavObserver />
 
-      <LocomotiveProvider>
-        <div id="nav-sentinel" className="h-[50px]" />
-        {children}
-      </LocomotiveProvider>
+      <div id="nav-sentinel" className="h-[50px]" />
+      {children}
 
       <Analytics />
       <SpeedInsights />
