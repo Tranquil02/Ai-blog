@@ -20,7 +20,10 @@ const normalizeImageUrl = (value) => {
   if (!url) return null;
   // Avoid embedding huge base64/data URIs in ISR payloads.
   if (url.startsWith("data:")) return null;
-  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
+  if (url.startsWith("http://")) {
+    return url.replace(/^http:\/\//i, "https://");
+  }
+  if (url.startsWith("https://") || url.startsWith("/")) {
     return url;
   }
   return null;

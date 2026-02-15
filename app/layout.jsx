@@ -1,4 +1,5 @@
 import "./globals.css";
+import Script from "next/script";
 
 export const metadata = {
   metadataBase: new URL(
@@ -47,14 +48,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="antialiased">
-      <head>
-        <script
+    <html lang="en" className="antialiased" suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <Script
+          id="ad-network-script"
           src="https://pl28710742.effectivegatecpm.com/06/bf/79/06bf7971603cd012368da082f6bc412c.js"
-          async
+          strategy="afterInteractive"
         />
-      </head>
-      <body>
         {children}
       </body>
     </html>

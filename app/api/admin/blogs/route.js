@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { AUTH_COOKIE_NAME, verifyAdminToken } from "@/lib/jwt";
 import { getDb } from "@/lib/mongodb";
+import { analyzeBlogQuality } from "@/lib/contentQuality";
 
 const collectionName = "blogs";
 
@@ -49,6 +50,17 @@ export async function POST(req) {
   const normalizedTags = Array.isArray(tags)
     ? tags.map((tag) => tag.trim()).filter(Boolean)
     : [];
+  const quality = analyzeBlogQuality({ title, excerpt, content, status });
+
+  if (quality.blockPublish) {
+    return NextResponse.json(
+      {
+        error: "Quality checks failed for publishing.",
+        quality,
+      },
+      { status: 400 }
+    );
+  }
 
   const document = {
     title,
@@ -64,6 +76,9 @@ export async function POST(req) {
     views: 0,
     likes: 0,
     saves: 0,
+    quality_score: quality.score,
+    quality_issues: quality.issues,
+    quality_checked_at: now,
     created_at: now,
     updated_at: now,
     published_at: status === "published" ? now : null,
@@ -72,5 +87,8 @@ export async function POST(req) {
   const db = await getDb();
   const result = await db.collection(collectionName).insertOne(document);
 
-  return NextResponse.json({ id: result.insertedId.toString() });
+  return NextResponse.json({
+    id: result.insertedId.toString(),
+    quality,
+  });
 }
