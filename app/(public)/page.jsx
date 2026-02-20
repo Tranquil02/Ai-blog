@@ -1,4 +1,4 @@
-import { getAllBlogs } from '@/lib/blog';
+import { getAllBlogs } from "@/lib/blog";
 import HomeClient from './HomeClient';
 
 export const metadata = {
@@ -9,6 +9,8 @@ export const metadata = {
 
 export const revalidate = 300;
 
+const HOME_FETCH_TIMEOUT_MS = Number(process.env.HOME_FETCH_TIMEOUT_MS || 2500);
+
 const clamp = (value, max) => {
   const text = typeof value === "string" ? value : "";
   return text.length > max ? `${text.slice(0, max).trim()}...` : text;
@@ -17,15 +19,9 @@ const clamp = (value, max) => {
 const normalizeImageUrl = (value) => {
   if (typeof value !== "string") return null;
   const url = value.trim();
-  if (!url) return null;
-  // Avoid embedding huge base64/data URIs in ISR payloads.
-  if (url.startsWith("data:")) return null;
-  if (url.startsWith("http://")) {
-    return url.replace(/^http:\/\//i, "https://");
-  }
-  if (url.startsWith("https://") || url.startsWith("/")) {
-    return url;
-  }
+  if (!url || url.startsWith("data:")) return null;
+  if (url.startsWith("http://")) return url.replace(/^http:\/\//i, "https://");
+  if (url.startsWith("https://") || url.startsWith("/")) return url;
   return null;
 };
 
@@ -35,15 +31,22 @@ const toHomeBlogCard = (post) => ({
   title: clamp(post?.title, 160),
   excerpt: clamp(post?.excerpt, 320),
   cover_image: normalizeImageUrl(post?.cover_image),
+  has_cover_image: Boolean(post?.has_cover_image),
 });
 
 export default async function Home() {
-  let blogs = [];
+  let initialBlogs = [];
   try {
-    blogs = (await getAllBlogs(7)).map(toHomeBlogCard);
+    const blogs = await Promise.race([
+      getAllBlogs(7),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("HOME_FETCH_TIMEOUT")), HOME_FETCH_TIMEOUT_MS)
+      ),
+    ]);
+    initialBlogs = Array.isArray(blogs) ? blogs.map(toHomeBlogCard) : [];
   } catch {
-    blogs = [];
+    initialBlogs = [];
   }
 
-  return <HomeClient initialBlogs={blogs} />;
+  return <HomeClient initialBlogs={initialBlogs} />;
 }

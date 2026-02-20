@@ -1,5 +1,4 @@
 import BlogClient from './BlogClient';
-import Provider from '@/lib/tanstack_query';
 
 export const metadata = {
   title: "TrendyStory Blog",
@@ -21,9 +20,5 @@ export const metadata = {
 };
 
 export default async function BlogPage() {
-  return (
-    <Provider>
-      <BlogClient />
-    </Provider>
-  );
+  return <BlogClient />;
 }

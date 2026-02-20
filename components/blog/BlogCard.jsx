@@ -23,6 +23,9 @@ export default function BlogCard({ post }) {
   const publishedDate = post?.published_at
     ? dateFormatter.format(new Date(post.published_at))
     : "";
+  const coverSrc =
+    post?.cover_image ||
+    (post?.has_cover_image && post?.id ? `/api/blog/cover/${post.id}` : null);
 
   return (
     <article
@@ -37,9 +40,9 @@ export default function BlogCard({ post }) {
       "
     >
       <div className="relative w-full aspect-[4/3] overflow-hidden">
-        {post.cover_image ? (
+        {coverSrc ? (
           <Image
-            src={post.cover_image}
+            src={coverSrc}
             alt={post.title}
             fill
             unoptimized
