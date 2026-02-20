@@ -4,6 +4,9 @@ import { Analytics } from "@vercel/analytics/react";
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="antialiased" suppressHydrationWarning>
+      <head>
+        <script src="https://quge5.com/88/tag.min.js" data-zone="212899" async data-cfasync="false"></script>
+      </head>
       <body suppressHydrationWarning>
         {/* Ad Script */}
         <Script
