@@ -1,5 +1,6 @@
 import "./globals.css";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   metadataBase: new URL(
@@ -56,6 +57,10 @@ export default function RootLayout({ children }) {
           strategy="afterInteractive"
         />
         {children}
+    <html lang="en" className="antialiased">
+      <body>
+        {children}
+        <Analytics />
       </body>
     </html>
   );
