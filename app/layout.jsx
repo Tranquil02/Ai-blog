@@ -5,7 +5,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="antialiased" suppressHydrationWarning>
       <head>
-        <script src="https://quge5.com/88/tag.min.js" data-zone="212899" async data-cfasync="false"></script>
+        <Script
+          src="https://quge5.com/88/tag.min.js"
+          data-zone="212899"
+          strategy="afterInteractive"
+        />
       </head>
       <body suppressHydrationWarning>
         {/* Ad Script */}
@@ -14,6 +18,7 @@ export default function RootLayout({ children }) {
           src="https://pl28710742.effectivegatecpm.com/06/bf/79/06bf7971603cd012368da082f6bc412c.js"
           strategy="afterInteractive"
         />
+
 
         {children}
 
