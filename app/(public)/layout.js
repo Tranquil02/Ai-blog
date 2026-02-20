@@ -4,8 +4,8 @@ import "../globals.css";
 import { Space_Grotesk, Fraunces } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import Provider from "@/lib/tanstack_query";
 
-import LocomotiveProvider from '@/Provider/Locomotiveprovider';
 import NavbarWrapper from '@/components/NavbarWrapper';
 import NavObserver from '@/components/Navobserver';
 
@@ -58,30 +58,30 @@ export default function PublicLayout({ children }) {
   };
 
   return (
-    <div
-      className={`
-        ${spaceGrotesk.variable}
-        ${fraunces.variable}
-        font-sans
-        bg-[var(--bg-primary)]
-        text-[var(--text-primary)]
-      `}
-    >
-      <script
-        type="application/ld+json"
-        suppressHydrationWarning
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <NavbarWrapper />
-      <NavObserver />
+    <Provider>
+      <div
+        className={`
+          ${spaceGrotesk.variable}
+          ${fraunces.variable}
+          font-sans
+          bg-[var(--bg-primary)]
+          text-[var(--text-primary)]
+        `}
+      >
+        <script
+          type="application/ld+json"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <NavbarWrapper />
+        <NavObserver />
 
-      <LocomotiveProvider>
         <div id="nav-sentinel" className="h-[50px]" />
         {children}
-      </LocomotiveProvider>
 
-      <Analytics />
-      <SpeedInsights />
-    </div>
+        <Analytics />
+        <SpeedInsights />
+      </div>
+    </Provider>
   );
 }

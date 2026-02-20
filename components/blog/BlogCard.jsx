@@ -5,6 +5,13 @@ import { User, ArrowUpRight, Clock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
 export default function BlogCard({ post }) {
   const router = useRouter();
 
@@ -14,8 +21,11 @@ export default function BlogCard({ post }) {
   };
 
   const publishedDate = post?.published_at
-    ? new Date(post.published_at).toLocaleDateString()
+    ? dateFormatter.format(new Date(post.published_at))
     : "";
+  const coverSrc =
+    post?.cover_image ||
+    (post?.has_cover_image && post?.id ? `/api/blog/cover/${post.id}` : null);
 
   return (
     <article
@@ -30,11 +40,12 @@ export default function BlogCard({ post }) {
       "
     >
       <div className="relative w-full aspect-[4/3] overflow-hidden">
-        {post.cover_image ? (
+        {coverSrc ? (
           <Image
-            src={post.cover_image}
+            src={coverSrc}
             alt={post.title}
             fill
+            unoptimized
             sizes="(max-width: 768px) 100vw,
                    (max-width: 1200px) 50vw,
                    33vw"

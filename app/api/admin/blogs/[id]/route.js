@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { ObjectId } from "mongodb";
 import { AUTH_COOKIE_NAME, verifyAdminToken } from "@/lib/jwt";
 import { getDb } from "@/lib/mongodb";
+import { analyzeBlogQuality } from "@/lib/contentQuality";
 
 const collectionName = "blogs";
 
@@ -44,8 +45,41 @@ export async function PUT(req, { params }) {
     tags,
   } = body;
 
+  const db = await getDb();
+  const collection = db.collection(collectionName);
+  const objectId = new ObjectId(id);
+  const current = await collection.findOne({ _id: objectId });
+
+  if (!current) {
+    return NextResponse.json({ error: "Blog not found." }, { status: 404 });
+  }
+
+  const finalTitle = title ?? current.title ?? "";
+  const finalExcerpt = excerpt ?? current.excerpt ?? "";
+  const finalContent = content ?? current.content ?? "";
+  const finalStatus = status ?? current.status ?? "draft";
+  const quality = analyzeBlogQuality({
+    title: finalTitle,
+    excerpt: finalExcerpt,
+    content: finalContent,
+    status: finalStatus,
+  });
+
+  if (quality.blockPublish) {
+    return NextResponse.json(
+      {
+        error: "Quality checks failed for publishing.",
+        quality,
+      },
+      { status: 400 }
+    );
+  }
+
   const update = {
     updated_at: new Date(),
+    quality_score: quality.score,
+    quality_issues: quality.issues,
+    quality_checked_at: new Date(),
   };
 
   if (title) update.title = title;
@@ -67,16 +101,11 @@ export async function PUT(req, { params }) {
     update.published_at = new Date();
   }
 
-  const db = await getDb();
-  const result = await db.collection(collectionName).findOneAndUpdate(
-    { _id: new ObjectId(id) },
+  const updated = await collection.findOneAndUpdate(
+    { _id: objectId },
     { $set: update },
-    { returnDocument: "after" }
+    { returnDocument: "after", includeResultMetadata: false }
   );
 
-  if (!result.value) {
-    return NextResponse.json({ error: "Blog not found." }, { status: 404 });
-  }
-
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: Boolean(updated), quality });
 }

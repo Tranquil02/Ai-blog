@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Hero from "@/components/Hero"
 import BlogGrid from '@/components/blog/BlogGrid';
@@ -8,11 +8,29 @@ import Footer from '@/components/footer';
 import SectionReveal from '@/components/ui/SectionReveal';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useQuery } from "@tanstack/react-query";
+import { fetchHomeBlogs } from "@/lib/api/blog";
 
 export default function HomeClient({ initialBlogs }) {
-  const blogList = Array.isArray(initialBlogs) ? initialBlogs : [];
+  const { data, isLoading } = useQuery({
+    queryKey: ["home-blogs", 7],
+    queryFn: () => fetchHomeBlogs(7),
+    initialData: Array.isArray(initialBlogs) ? initialBlogs : [],
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  const blogList = Array.isArray(data) ? data : [];
   const featured = blogList[0];
   const latest = blogList.slice(1, 7);
+  const gridPosts = latest.length > 0 ? latest : blogList;
+  const featuredCoverSrc =
+    featured?.cover_image ||
+    (featured?.has_cover_image && featured?.id
+      ? `/api/blog/cover/${featured.id}`
+      : null);
 
   return (
     <main className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
@@ -55,12 +73,13 @@ export default function HomeClient({ initialBlogs }) {
                   Read the story
                 </Link>
               </div>
-              {featured.cover_image && (
+              {featuredCoverSrc && (
                 <div className="relative aspect-[4/3] rounded-[2rem] overflow-hidden border border-[var(--border-light)]">
                   <Image
-                    src={featured.cover_image}
+                    src={featuredCoverSrc}
                     alt={featured.title}
                     fill
+                    unoptimized
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 40vw"
                   />
@@ -70,7 +89,13 @@ export default function HomeClient({ initialBlogs }) {
           </SectionReveal>
         )}
 
-        <BlogGrid posts={latest} />
+        {isLoading && blogList.length === 0 ? (
+          <div className="max-w-[1600px] mx-auto w-full py-8 text-center text-[var(--text-muted)]">
+            Loading stories...
+          </div>
+        ) : (
+          <BlogGrid posts={gridPosts} />
+        )}
         <div className="flex justify-center mt-16">
           <Link
             href="/blog"

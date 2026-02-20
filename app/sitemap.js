@@ -4,7 +4,7 @@ export const revalidate = 3600;
 
 export default async function sitemap() {
   const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://trendystory.site";
+    "https://trendystory.site";
   const now = new Date().toISOString();
 
   const staticRoutes = ["/", "/about", "/blog", "/quotes", "/connect"].map(

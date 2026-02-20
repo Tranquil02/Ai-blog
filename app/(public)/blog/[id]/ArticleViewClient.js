@@ -15,6 +15,13 @@ import {
   Tag,
 } from "lucide-react";
 
+const articleDateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
 export default function ArticleViewClient({ post }) {
   const router = useRouter();
 
@@ -28,11 +35,7 @@ export default function ArticleViewClient({ post }) {
 
   const publishedDate = useMemo(() => {
     if (!post?.published_at) return null;
-    return new Date(post.published_at).toLocaleDateString(undefined, {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
+    return articleDateFormatter.format(new Date(post.published_at));
   }, [post?.published_at]);
 
   useEffect(() => {

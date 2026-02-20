@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useRef } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
+import { analyzeBlogQuality } from "@/lib/contentQuality";
 import {
   ArrowLeft, Save, Image as ImageIcon,
   Clock, AlertCircle, Upload, X, AlignLeft
@@ -27,8 +28,19 @@ export default function AddBlogPage() {
   const [imageData, setImageData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [qualityFromApi, setQualityFromApi] = useState(null);
 
   const readingTime = form.content ? Math.max(1, Math.ceil(form.content.trim().split(/\s+/).length / 200)) : 0;
+  const draftQuality = useMemo(
+    () =>
+      analyzeBlogQuality({
+        title: form.title,
+        excerpt: form.excerpt,
+        content: form.content,
+        status: form.status,
+      }),
+    [form]
+  );
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -63,9 +75,10 @@ export default function AddBlogPage() {
   e.preventDefault();
   setLoading(true);
   setError(null);
+  setQualityFromApi(null);
 
   try {
-    await axios.post("/api/admin/blogs", {
+    const response = await axios.post("/api/admin/blogs", {
       title: form.title,
       excerpt: form.excerpt,
       content: form.content,
@@ -78,11 +91,18 @@ export default function AddBlogPage() {
         .filter(Boolean),
       cover_image: imageData,
     });
+    setQualityFromApi(response?.data?.quality ?? null);
 
     router.push("/main/admin");
   } catch (err) {
     console.error(err);
-    setError(err.message);
+    const apiError =
+      err?.response?.data?.error ||
+      err?.response?.statusText ||
+      err?.message ||
+      "Failed to publish blog.";
+    setError(apiError);
+    setQualityFromApi(err?.response?.data?.quality ?? null);
     setLoading(false);
   }
 };
@@ -113,6 +133,22 @@ export default function AddBlogPage() {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl flex gap-3">
               <AlertCircle size={20} /> <p className="text-sm font-medium">{error}</p>
+            </div>
+          )}
+          {(qualityFromApi || draftQuality) && (
+            <div className="rounded-2xl border border-gray-200 bg-white p-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                Content quality score: {(qualityFromApi || draftQuality).score}/100
+              </p>
+              {(qualityFromApi || draftQuality).issues.length > 0 ? (
+                <ul className="mt-3 space-y-1 text-sm text-gray-700">
+                  {(qualityFromApi || draftQuality).issues.slice(0, 5).map((issue) => (
+                    <li key={issue.code}>- {issue.message}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-sm text-emerald-700">No major issues detected.</p>
+              )}
             </div>
           )}
 
